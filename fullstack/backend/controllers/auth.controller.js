@@ -5,7 +5,6 @@ import { sendEmail } from "../utils/email.js"
 import asyncHandler from "express-async-handler"
 
 // Generate JWT token 21312rvdsfw
-// Generate JWT token 21312rvdsfw
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: "30d",
