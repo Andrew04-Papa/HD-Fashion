@@ -1,0 +1,12 @@
+{
+  "Users": [
+    {
+      "Id": 1,
+      "Name": "Admin User",
+      "Email": "admin@example.com",
+      "Password": "$2b$10$3R.v3oqi3shMLiMu9RmPue4V769QzcNYuo8A53kAE.lPUNO40fFtq",
+      "IsAdmin": true,
+      "CreatedAt": "2025-04-15T13:17:55.855Z"
+    }
+  ]
+}
