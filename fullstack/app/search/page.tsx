@@ -1,84 +1,91 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { Checkbox } from "@/components/ui/checkbox"
-import ProductCard from "@/components/product-card"
-import { Loader2 } from "lucide-react"
-import type { Product } from "@/lib/products"
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
+import ProductCard from "@/components/product-card";
+import { Loader2 } from "lucide-react";
+import type { Product } from "@/lib/products";
+import Link from 'next/link';
 
 export default function SearchPage() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const query = searchParams.get("q") || ""
-  const category = searchParams.get("category") || ""
-  const minPrice = searchParams.get("minPrice") || ""
-  const maxPrice = searchParams.get("maxPrice") || ""
-  const sort = searchParams.get("sort") || "relevance"
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const query = searchParams.get("q") || "";
+  const category = searchParams.get("category") || "";
+  const minPrice = searchParams.get("minPrice") || "";
+  const maxPrice = searchParams.get("maxPrice") || "";
+  const sort = searchParams.get("sort") || "relevance";
 
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-  const [totalResults, setTotalResults] = useState(0)
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalResults, setTotalResults] = useState(0);
 
   // State for filter values
-  const [filterCategory, setFilterCategory] = useState(category)
-  const [filterMinPrice, setFilterMinPrice] = useState(minPrice)
-  const [filterMaxPrice, setFilterMaxPrice] = useState(maxPrice)
-  const [filterSort, setFilterSort] = useState(sort)
+  const [filterCategory, setFilterCategory] = useState<string[]>(category ? category.split(",") : []);
+  const [filterMinPrice, setFilterMinPrice] = useState(minPrice);
+  const [filterMaxPrice, setFilterMaxPrice] = useState(maxPrice);
+  const [filterSort, setFilterSort] = useState(sort);
 
   // Categories for filter
   const categories = [
+    { value: "all", label: "All Products" },
     { value: "men", label: "Men" },
     { value: "women", label: "Women" },
     { value: "accessories", label: "Accessories" },
-  ]
+  ];
 
+  // Search Query State
+  const [queryState, setQueryState] = useState(query);
+
+  // Handle Search Input Change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQueryState(e.target.value);
+  };
+
+  // Fetch search results based on query and filters
   useEffect(() => {
     async function fetchSearchResults() {
-      setLoading(true)
+      setLoading(true);
       try {
-        // Build query string
-        const params = new URLSearchParams()
-        if (query) params.append("q", query)
-        if (category) params.append("category", category)
-        if (minPrice) params.append("minPrice", minPrice)
-        if (maxPrice) params.append("maxPrice", maxPrice)
-        if (sort) params.append("sort", sort)
+        const params = new URLSearchParams();
+        if (queryState) params.append("q", queryState);
+        if (filterCategory.length > 0) params.append("category", filterCategory.join(","));
+        if (filterMinPrice) params.append("minPrice", filterMinPrice);
+        if (filterMaxPrice) params.append("maxPrice", filterMaxPrice);
+        if (filterSort) params.append("sort", filterSort);
 
-        const response = await fetch(`/api/search?${params.toString()}`)
+        const response = await fetch(`/api/search?${params.toString()}`);
         if (response.ok) {
-          const data = await response.json()
-          setProducts(data.products)
-          setTotalResults(data.total)
+          const data = await response.json();
+          setProducts(data.products);
+          setTotalResults(data.total);
         }
       } catch (error) {
-        console.error("Error fetching search results:", error)
+        console.error("Error fetching search results:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
-    fetchSearchResults()
-  }, [query, category, minPrice, maxPrice, sort])
+    fetchSearchResults();
+  }, [queryState, filterCategory, filterMinPrice, filterMaxPrice, filterSort]);
 
-  // Apply filters
+  // Apply filters and update URL
   const applyFilters = () => {
-    // Build URL with filters
-    const params = new URLSearchParams()
-    if (query) params.append("q", query)
-    if (filterCategory) params.append("category", filterCategory)
-    if (filterMinPrice) params.append("minPrice", filterMinPrice)
-    if (filterMaxPrice) params.append("maxPrice", filterMaxPrice)
-    if (filterSort) params.append("sort", filterSort)
+    const params = new URLSearchParams();
+    if (queryState) params.append("q", queryState);
+    if (filterCategory.length > 0) params.append("category", filterCategory.join(","));
+    if (filterMinPrice) params.append("minPrice", filterMinPrice);
+    if (filterMaxPrice) params.append("maxPrice", filterMaxPrice);
+    if (filterSort) params.append("sort", filterSort);
 
-    // Update URL with new filters
-    router.push(`/search?${params.toString()}`)
-  }
+    router.push(`/search?${params.toString()}`);
+  };
 
   return (
     <main className="flex-1">
@@ -91,13 +98,25 @@ export default function SearchPage() {
               Searching...
             </span>
           ) : (
-            `Found ${totalResults} results for "${query}"`
+            `Found ${totalResults} results for "${queryState}"`
           )}
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Filters Sidebar */}
+          {/* Left Side - Search and Filters */}
           <div className="space-y-6">
+            {/* Search Bar */}
+            <div className="flex items-center space-x-4">
+              <Input
+                type="text"
+                value={queryState}
+                onChange={handleSearchChange}
+                placeholder="Search for products..."
+                className="p-2 border border-gray-300 rounded-lg flex-1"
+              />
+            </div>
+
+            {/* Categories Filter with Checkboxes */}
             <div>
               <h3 className="font-medium mb-3">Categories</h3>
               <div className="space-y-2">
@@ -105,13 +124,15 @@ export default function SearchPage() {
                   <div key={cat.value} className="flex items-center space-x-2">
                     <Checkbox
                       id={`category-${cat.value}`}
-                      checked={filterCategory === cat.value}
-                      onCheckedChange={() => setFilterCategory(filterCategory === cat.value ? "" : cat.value)}
+                      checked={filterCategory.includes(cat.value)}
+                      onCheckedChange={(checked) => {
+                        const updatedCategory = checked
+                          ? [...filterCategory, cat.value]
+                          : filterCategory.filter((value) => value !== cat.value);
+                        setFilterCategory(updatedCategory);
+                      }}
                     />
-                    <label
-                      htmlFor={`category-${cat.value}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
+                    <label htmlFor={`category-${cat.value}`} className="text-sm font-medium leading-none">
                       {cat.label}
                     </label>
                   </div>
@@ -121,6 +142,7 @@ export default function SearchPage() {
 
             <Separator />
 
+            {/* Sort By */}
             <div>
               <h3 className="font-medium mb-3">Sort By</h3>
               <Select value={filterSort} onValueChange={setFilterSort}>
@@ -138,6 +160,7 @@ export default function SearchPage() {
 
             <Separator />
 
+            {/* Price Range */}
             <div>
               <h3 className="font-medium mb-3">Price Range</h3>
               <div className="grid grid-cols-2 gap-2">
@@ -160,7 +183,7 @@ export default function SearchPage() {
             </div>
           </div>
 
-          {/* Products Grid */}
+          {/* Right Side - Products */}
           <div className="md:col-span-3">
             {loading ? (
               <div className="flex justify-center items-center h-64">
@@ -187,5 +210,5 @@ export default function SearchPage() {
         </div>
       </div>
     </main>
-  )
+  );
 }
