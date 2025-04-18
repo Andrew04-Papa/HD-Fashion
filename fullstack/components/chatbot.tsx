@@ -59,12 +59,12 @@ export default function Chatbot() {
                 {message.role === "user" ? (
                   <>
                     <AvatarFallback>U</AvatarFallback>
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" />
+                    <AvatarImage src="/Customer.png?height=32&width=32" />
                   </>
                 ) : (
                   <>
                     <AvatarFallback>AI</AvatarFallback>
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" />
+                    <AvatarImage src="/Avatar of chatbot.png?height=32&width=32" />
                   </>
                 )}
               </Avatar>
