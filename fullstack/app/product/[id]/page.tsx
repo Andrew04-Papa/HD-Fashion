@@ -1,29 +1,32 @@
-import { notFound } from "next/navigation"
-import Image from "next/image"
-import Link from "next/link"
-import { Heart, ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getProductById } from "@/lib/products"
-import AddToCartForm from "@/components/add-to-cart-form"
-import ChatbotButton from "@/components/chatbot-button"
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { Heart, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getProductById } from "@/lib/products";
+import AddToCartForm from "@/components/add-to-cart-form";
+import ChatbotButton from "@/components/chatbot-button";
 
+// CategoryPageProps interface
 interface ProductPageProps {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
-export default function ProductPage({ params }: ProductPageProps) {
-  // Destructure id from params - this is safe in this context
-  const { id } = params
+// ProductPage component using async/await for params
+export default async function ProductPage({ params }: ProductPageProps) {
+  // Await params to fix the error
+  const { id } = params; // Destructure id from params
 
-  // Get product by id - this is a synchronous function in lib/products.ts
-  const product = getProductById(id)
+  // Fetch the product for the given id
+  const product = await getProductById(id); // Await the product fetch
 
+  // If the product is not found, return a 404
   if (!product) {
-    notFound()
+    notFound(); // Trigger a 404 if no product is found
   }
 
   return (
@@ -133,6 +136,5 @@ export default function ProductPage({ params }: ProductPageProps) {
       </div>
       <ChatbotButton />
     </main>
-  )
+  );
 }
-
