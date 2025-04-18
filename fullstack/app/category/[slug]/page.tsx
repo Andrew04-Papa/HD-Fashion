@@ -1,33 +1,39 @@
-import { notFound } from "next/navigation"
-import { getProductsByCategory } from "@/lib/products"
-import ProductCard from "@/components/product-card"
-import ChatbotButton from "@/components/chatbot-button"
+import { notFound } from "next/navigation";
+import { getProductsByCategory } from "@/lib/products"; // This fetches the products
+import ProductCard from "@/components/product-card";
+import ChatbotButton from "@/components/chatbot-button";
 
+// CategoryPageProps interface
 interface CategoryPageProps {
   params: {
-    slug: string
-  }
+    slug: string;
+  };
 }
 
-// Remove the async and await keywords because getProductsByCategory is a synchronous function
-export default function CategoryPage({ params }: CategoryPageProps) {
-  const { slug } = params
+// Use async/await in your dynamic routes
+export default async function CategoryPage({ params }: CategoryPageProps) {
+  // Await the params object
+  const { slug } = await params; // Await the dynamic route params here
 
-  // No need to await because this is a synchronous function
-  const products = getProductsByCategory(slug)
+  // Fetch the products for the category using async function
+  const products = await getProductsByCategory(slug); // Ensure this is not an async function directly
 
+  // If no products are found, return a 404
   if (products.length === 0) {
-    notFound() // If no product, return error 404
+    notFound(); // Trigger a 404 if no products found
   }
 
+  // Define category names for display
   const categoryNames: Record<string, string> = {
     men: "Men's Fashion",
     women: "Women's Fashion",
     accessories: "Accessories",
-  }
+  };
 
-  const categoryName = categoryNames[slug] || slug
+  // Set category name based on slug or use slug itself
+  const categoryName = categoryNames[slug] || slug;
 
+  // Return the component with fetched products
   return (
     <main className="flex-1">
       <div className="container px-4 py-8 md:py-12">
@@ -41,6 +47,5 @@ export default function CategoryPage({ params }: CategoryPageProps) {
       </div>
       <ChatbotButton />
     </main>
-  )
+  );
 }
-
